@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Action Words Adventure - Explore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #f0fdf4;
+            background-image: radial-gradient(#bbf7d0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .hotspot {
+            position: absolute;
+            border-radius: 1rem;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .hotspot:hover, .hotspot:focus {
+            background-color: rgba(255, 255, 255, 0.3);
+            border-color: #facc15;
+            outline: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .pop-in {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.9) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col p-4 sm:p-6">
+
+    <header class="max-w-3xl mx-auto w-full mb-6 text-center">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-600 drop-shadow-sm mb-2">
+            Action Words Adventure
+        </h1>
+        <p class="text-lg text-slate-600 font-medium">Explore — tap a picture</p>
+    </header>
+
+    <main class="max-w-3xl mx-auto w-full bg-white rounded-3xl shadow-xl overflow-hidden border-4 border-yellow-300 flex-grow flex flex-col p-4 sm:p-6 items-center">
+
+        <!-- Book Cover & Hotspots -->
+        <div class="relative w-full max-w-lg mx-auto rounded-xl overflow-hidden shadow-md border-2 border-slate-200 bg-slate-50 flex items-center justify-center">
+            
+            <!-- Image wrapper -->
+            <div id="image-wrapper" class="relative w-full" style="aspect-ratio: 7 / 10;">
+                <!-- Image hardcoded to book-page_5.jpg -->
+                <img id="cover-image" src="book-page_5.jpg" alt="Book Cover featuring running, reading, and writing activities" class="absolute inset-0 w-full h-full object-cover block select-none pointer-events-none" onerror="this.style.display='none'; document.getElementById('missing-img-msg').classList.remove('hidden');">
+                
+                <!-- Fallback text when image fails to load in preview -->
+                <div id="missing-img-msg" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 hidden p-6 text-center bg-slate-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mb-3 text-slate-300" viewBox="0 0 256 256"><path fill="currentColor" d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,16V158.75l-26.07-26.06a16,16,0,0,0-22.63,0l-20,20-44-44a16,16,0,0,0-22.62,0L40,149.37V56ZM40,172l52-52,80,80H40Zm176,28H194.63l-36-36,20-20L216,181.38V200ZM144,104a12,12,0,1,1-12-12A12,12,0,0,1,144,104Z"></path></svg>
+                    <p class="font-bold text-lg text-slate-500">book-page_5.jpg</p>
+                    <p class="text-sm mt-1">Image will appear here when hosted on GitHub.</p>
+                    <p class="text-xs mt-3 bg-yellow-100 text-yellow-800 border border-yellow-300 px-3 py-1 rounded-full font-medium">Hotspots still work in preview! Tap around to test.</p>
+                </div>
+                
+                <!-- RUN: left 7%, top 35%, width 45%, height 39% -->
+                <div class="hotspot" style="top: 35%; left: 7%; width: 45%; height: 39%;" 
+                     tabindex="0" role="button" aria-label="Tap to explore the word RUN" 
+                     onclick="selectActivity('run')" onkeypress="if(event.key==='Enter') selectActivity('run')">
+                </div>
+                
+                <!-- READ: left 64%, top 27%, width 36%, height 32% -->
+                <div class="hotspot" style="top: 27%; left: 64%; width: 36%; height: 32%;" 
+                     tabindex="0" role="button" aria-label="Tap to explore the word READ" 
+                     onclick="selectActivity('read')" onkeypress="if(event.key==='Enter') selectActivity('read')">
+                </div>
+                
+                <!-- WRITE: left 51%, top 60%, width 49%, height 35% -->
+                <div class="hotspot" style="top: 60%; left: 51%; width: 49%; height: 35%;" 
+                     tabindex="0" role="button" aria-label="Tap to explore the word WRITE" 
+                     onclick="selectActivity('write')" onkeypress="if(event.key==='Enter') selectActivity('write')">
+                </div>
+            </div>
+        </div>
+
+        <!-- Fallback Buttons -->
+        <div class="w-full max-w-lg flex justify-center gap-3 mt-6">
+            <button onclick="selectActivity('run')" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-transform active:scale-95 border-b-4 border-red-700">RUN</button>
+            <button onclick="selectActivity('read')" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-transform active:scale-95 border-b-4 border-green-700">READ</button>
+            <button onclick="selectActivity('write')" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-transform active:scale-95 border-b-4 border-blue-700">WRITE</button>
+        </div>
+
+        <!-- TTS Error Message -->
+        <div id="tts-error" class="hidden mt-4 bg-red-50 text-red-700 px-4 py-3 rounded-xl border border-red-200 text-sm font-medium w-full max-w-lg text-center">
+            Speech synthesis is not available in this browser.
+        </div>
+
+        <!-- Explore Activity Card -->
+        <div id="explore-card-container" class="w-full max-w-lg mt-6 hidden">
+            <!-- Injected via JS -->
+        </div>
+
+    </main>
+
+    <script>
+        const activitiesData = {
+            run: {
+                word: "RUN",
+                color: "text-red-600",
+                bg: "bg-red-50",
+                border: "border-red-200",
+                sentence: "I run to school."
+            },
+            read: {
+                word: "READ",
+                color: "text-green-600",
+                bg: "bg-green-50",
+                border: "border-green-200",
+                sentence: "She reads a story."
+            },
+            write: {
+                word: "WRITE",
+                color: "text-blue-600",
+                bg: "bg-blue-50",
+                border: "border-blue-200",
+                sentence: "He writes in his book."
+            }
+        };
+
+        let activeWordId = null;
+        const synth = window.speechSynthesis;
+
+        // Check TTS support
+        if (!synth) {
+            document.getElementById('tts-error').classList.remove('hidden');
+        }
+
+        // --- UI Interactions ---
+        function createCardHTML(activityData, wordId) {
+            const speechText = `${activityData.word}. ${activityData.sentence}`;
+            return `
+                <div class="bg-white rounded-2xl shadow-xl border-2 ${activityData.border} overflow-hidden pop-in">
+                    <div class="${activityData.bg} px-5 py-3 border-b ${activityData.border} flex justify-between items-center">
+                        <h2 class="text-2xl font-black ${activityData.color} tracking-wide">${activityData.word}</h2>
+                    </div>
+                    <div class="p-5">
+                        <p class="text-xl text-slate-700 font-medium mb-6">"${activityData.sentence}"</p>
+                        
+                        <div class="flex gap-3 mb-5">
+                            <button onclick="playTTS('${speechText}')" class="flex-1 flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 py-3 rounded-xl font-bold transition-colors shadow-sm" aria-label="Listen">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256"><path fill="currentColor" d="M155.51,24.81a8,8,0,0,0-8.42,.88L73.25,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H73.25l73.84,54.31A8,8,0,0,0,160,224V32A8,8,0,0,0,155.51,24.81ZM144,207.64l-64-47.09A8,8,0,0,0,75.25,160H32V96H75.25a8,8,0,0,0,4.71-.55l64-47.09ZM197.35,165.17a8,8,0,0,1-11.83-10.79,40,40,0,0,0,0-52.76,8,8,0,0,1,11.83-10.79,56,56,0,0,1,0,74.34Zm37.11,33.58a8,8,0,0,1-11.75-10.87,88,88,0,0,0,0-119.76,8,8,0,0,1,11.75-10.87,104,104,0,0,1,0,141.5Z"></path></svg>
+                                Listen
+                            </button>
+                            <button onclick="playTTS('${speechText}')" class="flex-none p-3 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl transition-colors shadow-sm" aria-label="Replay" title="Replay">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256"><path fill="currentColor" d="M197.58,69.58a8,8,0,0,1,0-11.32,96,96,0,1,0,32.33,78,8,8,0,0,1,16-.94A112,112,0,1,1,214.63,52.63L234.34,32.91A8,8,0,0,1,248,38.57v56a8,8,0,0,1-8,8h-56a8,8,0,0,1-5.66-13.66l22.63-22.63Z"></path></svg>
+                            </button>
+                            <button onclick="stopTTS()" class="flex-none p-3 bg-slate-100 hover:bg-slate-200 text-red-500 border border-slate-200 rounded-xl transition-colors shadow-sm" aria-label="Stop" title="Stop">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256"><path fill="currentColor" d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32Zm0,176H48V48H208V208Z"></path></svg>
+                            </button>
+                        </div>
+                        
+                        <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-lg flex items-start gap-3 mt-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-indigo-500 mt-0.5 flex-none" viewBox="0 0 256 256"><path fill="currentColor" d="M128,24a80,80,0,0,0-80,80v16a80,80,0,0,0,160,0V104A80,80,0,0,0,128,24Zm64,96a64.07,64.07,0,0,1-64,64h-3.66c-2.48,0-5-.06-7.5-.18a64,64,0,1,1,75.16-75.16v11.34Zm-28.28-36.28a8,8,0,0,1,0,11.31l-24,24a8,8,0,0,1-11.32,0l-16-16a8,8,0,0,1,11.32-11.31L134,101.37l18.34-18.34A8,8,0,0,1,163.72,83.72Z"></path></svg>
+                            <p class="text-sm font-semibold text-indigo-900">Your turn! Say a sentence using this word.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectActivity(wordId) {
+            if (!activitiesData[wordId]) return;
+            
+            // If changing activity, stop current speech
+            if (activeWordId !== wordId) {
+                stopTTS();
+                activeWordId = wordId;
+            }
+            
+            const container = document.getElementById('explore-card-container');
+            container.innerHTML = createCardHTML(activitiesData[wordId], wordId);
+            container.classList.remove('hidden');
+        }
+
+        // --- Text to Speech ---
+        function playTTS(text) {
+            if (!synth) return;
+            
+            synth.cancel(); // Cancel any ongoing speech
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = "en-US";
+            utterance.rate = 0.85; 
+            
+            // Attempt to find a native English voice
+            const voices = synth.getVoices();
+            const preferredVoice = voices.find(v => v.lang === 'en-US' && !v.name.includes('Google')) 
+                                || voices.find(v => v.lang.startsWith('en-'));
+            
+            if (preferredVoice) {
+                utterance.voice = preferredVoice;
+            }
+            
+            synth.speak(utterance);
+        }
+
+        function stopTTS() {
+            if (synth) synth.cancel();
+        }
+
+        // Pre-load voices to avoid delay on first tap
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = () => synth.getVoices();
+        }
+
+    </script>
+</body>
+</html>
