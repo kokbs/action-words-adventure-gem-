@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Action Words Adventure - Explore</title>
+    <title>Action Words Adventure - Explore & AR</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -39,7 +39,7 @@
         }
     </style>
 </head>
-<body class="text-slate-800 min-h-screen flex flex-col p-4 sm:p-6">
+<body class="text-slate-800 min-h-screen flex flex-col p-4 sm:p-6 pb-24">
 
     <header class="max-w-3xl mx-auto w-full mb-6 text-center">
         <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-600 drop-shadow-sm mb-2">
@@ -53,17 +53,15 @@
         <!-- Book Cover & Hotspots -->
         <div class="relative w-full max-w-lg mx-auto rounded-xl overflow-hidden shadow-md border-2 border-slate-200 bg-slate-50 flex items-center justify-center">
             
-            <!-- Image wrapper -->
+            <!-- Image wrapper strictly matched to the book cover aspect ratio -->
             <div id="image-wrapper" class="relative w-full" style="aspect-ratio: 7 / 10;">
-                <!-- Image hardcoded to book-page_5.jpg -->
                 <img id="cover-image" src="book-page_5.jpg" alt="Book Cover featuring running, reading, and writing activities" class="absolute inset-0 w-full h-full object-cover block select-none pointer-events-none" onerror="this.style.display='none'; document.getElementById('missing-img-msg').classList.remove('hidden');">
                 
-                <!-- Fallback text when image fails to load in preview -->
+                <!-- Fallback text when image fails to load -->
                 <div id="missing-img-msg" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 hidden p-6 text-center bg-slate-100">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mb-3 text-slate-300" viewBox="0 0 256 256"><path fill="currentColor" d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,16V158.75l-26.07-26.06a16,16,0,0,0-22.63,0l-20,20-44-44a16,16,0,0,0-22.62,0L40,149.37V56ZM40,172l52-52,80,80H40Zm176,28H194.63l-36-36,20-20L216,181.38V200ZM144,104a12,12,0,1,1-12-12A12,12,0,0,1,144,104Z"></path></svg>
-                    <p class="font-bold text-lg text-slate-500">book-page_5.jpg</p>
-                    <p class="text-sm mt-1">Image will appear here when hosted on GitHub.</p>
-                    <p class="text-xs mt-3 bg-yellow-100 text-yellow-800 border border-yellow-300 px-3 py-1 rounded-full font-medium">Hotspots still work in preview! Tap around to test.</p>
+                    <p class="font-bold text-lg text-slate-500">book-page_5.jpg is missing</p>
+                    <p class="text-sm mt-1">Make sure it is uploaded in the same folder.</p>
                 </div>
                 
                 <!-- RUN: left 7%, top 35%, width 45%, height 39% -->
@@ -105,6 +103,60 @@
 
     </main>
 
+    <!-- Teacher Setup Section (Collapsible) -->
+    <section class="max-w-3xl mx-auto w-full mt-8 bg-slate-800 text-slate-200 rounded-2xl overflow-hidden shadow-lg">
+        <button onclick="document.getElementById('teacher-content').classList.toggle('hidden')" class="w-full px-6 py-4 flex justify-between items-center bg-slate-900 hover:bg-slate-950 transition-colors">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-400" viewBox="0 0 256 256"><path fill="currentColor" d="M216,112V64a16,16,0,0,0-16-16H56A16,16,0,0,0,40,64v48a8,8,0,0,0,16,0V64H200v48a8,8,0,0,0,16,0ZM88,112a8,8,0,0,1-8-8V88a8,8,0,0,1,16,0v16A8,8,0,0,1,88,112Zm40,0a8,8,0,0,1-8-8V88a8,8,0,0,1,16,0v16A8,8,0,0,1,128,112Zm40,0a8,8,0,0,1-8-8V88a8,8,0,0,1,16,0v16A8,8,0,0,1,168,112Zm48,40H40a16,16,0,0,0-16,16v40a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V168A16,16,0,0,0,216,152Zm0,56H40V168H216v40Z"></path></svg>
+                Teacher Setup: Prepare AR Targets
+            </h2>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-400" viewBox="0 0 256 256"><path fill="currentColor" d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></path></svg>
+        </button>
+        
+        <div id="teacher-content" class="p-6 hidden">
+            <p class="mb-4 text-sm text-slate-300">To create the AR experience, we need to extract the 3 specific illustrations from your book cover to use as tracking targets.</p>
+            
+            <button onclick="generateCrops()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded font-semibold mb-6 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256"><path fill="currentColor" d="M208,40H48A16,16,0,0,0,32,56V200a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V56A16,16,0,0,0,208,40Zm0,16V144L148.69,84.69a16,16,0,0,0-22.63,0L48,162.75V56ZM48,185.37l77.37-77.36,65.37,65.36ZM208,200H188.69l-44-44,20-20,43.31,43.31V200ZM92,108a12,12,0,1,1,12-12A12,12,0,0,1,92,108Z"></path></svg>
+                Generate Image Crops
+            </button>
+
+            <div id="crop-results" class="hidden">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    <!-- Run Crop -->
+                    <div class="bg-slate-700 p-3 rounded-lg flex flex-col items-center">
+                        <canvas id="crop-run" class="w-full h-auto bg-slate-900 rounded mb-3"></canvas>
+                        <span class="text-xs text-slate-400 mb-2 font-mono">00-run.jpg (Target 0)</span>
+                        <button onclick="downloadCrop('crop-run', '00-run.jpg')" class="w-full bg-slate-600 hover:bg-slate-500 py-1.5 rounded text-sm font-medium">Download</button>
+                    </div>
+                    <!-- Read Crop -->
+                    <div class="bg-slate-700 p-3 rounded-lg flex flex-col items-center">
+                        <canvas id="crop-read" class="w-full h-auto bg-slate-900 rounded mb-3"></canvas>
+                        <span class="text-xs text-slate-400 mb-2 font-mono">01-read.jpg (Target 1)</span>
+                        <button onclick="downloadCrop('crop-read', '01-read.jpg')" class="w-full bg-slate-600 hover:bg-slate-500 py-1.5 rounded text-sm font-medium">Download</button>
+                    </div>
+                    <!-- Write Crop -->
+                    <div class="bg-slate-700 p-3 rounded-lg flex flex-col items-center">
+                        <canvas id="crop-write" class="w-full h-auto bg-slate-900 rounded mb-3"></canvas>
+                        <span class="text-xs text-slate-400 mb-2 font-mono">02-write.jpg (Target 2)</span>
+                        <button onclick="downloadCrop('crop-write', '02-write.jpg')" class="w-full bg-slate-600 hover:bg-slate-500 py-1.5 rounded text-sm font-medium">Download</button>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                    <h3 class="font-bold text-yellow-400 mb-2">Next Step: Compile the Targets</h3>
+                    <ol class="list-decimal pl-5 text-sm space-y-2 text-slate-300">
+                        <li>Download all 3 images above.</li>
+                        <li>Go to the <a href="https://hiukim.github.io/mind-ar-js-doc/tools/compile" target="_blank" class="text-blue-400 hover:underline">MindAR Image Compiler</a>.</li>
+                        <li>Upload the 3 images <strong>in the exact order</strong> (00-run, 01-read, 02-write).</li>
+                        <li>Click Start and wait for it to generate.</li>
+                        <li>Download the compiled file, name it <code>targets.mind</code>, and upload it to your GitHub repository!</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <script>
         const activitiesData = {
             run: {
@@ -133,12 +185,10 @@
         let activeWordId = null;
         const synth = window.speechSynthesis;
 
-        // Check TTS support
         if (!synth) {
             document.getElementById('tts-error').classList.remove('hidden');
         }
 
-        // --- UI Interactions ---
         function createCardHTML(activityData, wordId) {
             const speechText = `${activityData.word}. ${activityData.sentence}`;
             return `
@@ -174,7 +224,6 @@
         function selectActivity(wordId) {
             if (!activitiesData[wordId]) return;
             
-            // If changing activity, stop current speech
             if (activeWordId !== wordId) {
                 stopTTS();
                 activeWordId = wordId;
@@ -188,22 +237,17 @@
         // --- Text to Speech ---
         function playTTS(text) {
             if (!synth) return;
-            
-            synth.cancel(); // Cancel any ongoing speech
+            synth.cancel(); 
             
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = "en-US";
             utterance.rate = 0.85; 
             
-            // Attempt to find a native English voice
             const voices = synth.getVoices();
             const preferredVoice = voices.find(v => v.lang === 'en-US' && !v.name.includes('Google')) 
                                 || voices.find(v => v.lang.startsWith('en-'));
             
-            if (preferredVoice) {
-                utterance.voice = preferredVoice;
-            }
-            
+            if (preferredVoice) utterance.voice = preferredVoice;
             synth.speak(utterance);
         }
 
@@ -211,11 +255,47 @@
             if (synth) synth.cancel();
         }
 
-        // Pre-load voices to avoid delay on first tap
         if (speechSynthesis.onvoiceschanged !== undefined) {
             speechSynthesis.onvoiceschanged = () => synth.getVoices();
         }
 
+        // --- Teacher Setup: Cropping Logic ---
+        function generateCrops() {
+            const img = document.getElementById('cover-image');
+            if (!img.complete || img.naturalWidth === 0) {
+                alert("Cover image hasn't loaded properly yet.");
+                return;
+            }
+
+            const nw = img.naturalWidth;
+            const nh = img.naturalHeight;
+
+            // Crop definitions based on your requested percentages
+            const crops = [
+                { id: 'run', canvasId: 'crop-run', left: 0.07, top: 0.35, width: 0.45, height: 0.39 },
+                { id: 'read', canvasId: 'crop-read', left: 0.64, top: 0.27, width: 0.36, height: 0.32 },
+                { id: 'write', canvasId: 'crop-write', left: 0.51, top: 0.60, width: 0.49, height: 0.35 }
+            ];
+
+            crops.forEach(c => {
+                const canvas = document.getElementById(c.canvasId);
+                canvas.width = nw * c.width;
+                canvas.height = nh * c.height;
+                const ctx = canvas.getContext('2d');
+                // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+                ctx.drawImage(img, nw * c.left, nh * c.top, nw * c.width, nh * c.height, 0, 0, canvas.width, canvas.height);
+            });
+
+            document.getElementById('crop-results').classList.remove('hidden');
+        }
+
+        function downloadCrop(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/jpeg', 1.0); // Highest quality JPG
+            link.click();
+        }
     </script>
 </body>
 </html>
