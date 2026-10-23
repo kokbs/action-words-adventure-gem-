@@ -3,14 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Action Words Adventure - Explore & AR</title>
+    <title>Action Words Adventure - AR & Explore</title>
+    
+    <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- A-Frame and MindAR for Augmented Reality -->
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
     <style>
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background-color: #f0fdf4;
             background-image: radial-gradient(#bbf7d0 1px, transparent 1px);
             background-size: 20px 20px;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* Prevent A-Frame from hijacking the whole page when not in AR mode */
+        .a-html { display: none !important; }
+        
+        #ar-view {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 100;
+            background: #000;
         }
 
         .hotspot {
@@ -39,262 +58,227 @@
         }
     </style>
 </head>
-<body class="text-slate-800 min-h-screen flex flex-col p-4 sm:p-6 pb-24">
+<body class="text-slate-800 min-h-screen flex flex-col items-center p-4">
 
-    <header class="max-w-3xl mx-auto w-full mb-6 text-center">
-        <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-600 drop-shadow-sm mb-2">
-            Action Words Adventure
+    <!-- MAIN MENU -->
+    <div id="main-menu" class="max-w-md w-full flex flex-col items-center justify-center min-h-[80vh] pop-in">
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-blue-600 drop-shadow-sm mb-4 text-center leading-tight">
+            Action Words<br><span class="text-green-500">Adventure</span>
         </h1>
-        <p class="text-lg text-slate-600 font-medium">Explore — tap a picture</p>
-    </header>
+        <p class="text-lg text-slate-600 font-medium mb-10 text-center">Choose how you want to play!</p>
 
-    <main class="max-w-3xl mx-auto w-full bg-white rounded-3xl shadow-xl overflow-hidden border-4 border-yellow-300 flex-grow flex flex-col p-4 sm:p-6 items-center">
-
-        <!-- Book Cover & Hotspots -->
-        <div class="relative w-full max-w-lg mx-auto rounded-xl overflow-hidden shadow-md border-2 border-slate-200 bg-slate-50 flex items-center justify-center">
-            
-            <!-- Image wrapper strictly matched to the book cover aspect ratio -->
-            <div id="image-wrapper" class="relative w-full" style="aspect-ratio: 7 / 10;">
-                <img id="cover-image" src="book-page_5.jpg" alt="Book Cover featuring running, reading, and writing activities" class="absolute inset-0 w-full h-full object-cover block select-none pointer-events-none" onerror="this.style.display='none'; document.getElementById('missing-img-msg').classList.remove('hidden');">
-                
-                <!-- Fallback text when image fails to load -->
-                <div id="missing-img-msg" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 hidden p-6 text-center bg-slate-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mb-3 text-slate-300" viewBox="0 0 256 256"><path fill="currentColor" d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,16V158.75l-26.07-26.06a16,16,0,0,0-22.63,0l-20,20-44-44a16,16,0,0,0-22.62,0L40,149.37V56ZM40,172l52-52,80,80H40Zm176,28H194.63l-36-36,20-20L216,181.38V200ZM144,104a12,12,0,1,1-12-12A12,12,0,0,1,144,104Z"></path></svg>
-                    <p class="font-bold text-lg text-slate-500">book-page_5.jpg is missing</p>
-                    <p class="text-sm mt-1">Make sure it is uploaded in the same folder.</p>
-                </div>
-                
-                <!-- RUN: left 7%, top 35%, width 45%, height 39% -->
-                <div class="hotspot" style="top: 35%; left: 7%; width: 45%; height: 39%;" 
-                     tabindex="0" role="button" aria-label="Tap to explore the word RUN" 
-                     onclick="selectActivity('run')" onkeypress="if(event.key==='Enter') selectActivity('run')">
-                </div>
-                
-                <!-- READ: left 64%, top 27%, width 36%, height 32% -->
-                <div class="hotspot" style="top: 27%; left: 64%; width: 36%; height: 32%;" 
-                     tabindex="0" role="button" aria-label="Tap to explore the word READ" 
-                     onclick="selectActivity('read')" onkeypress="if(event.key==='Enter') selectActivity('read')">
-                </div>
-                
-                <!-- WRITE: left 51%, top 60%, width 49%, height 35% -->
-                <div class="hotspot" style="top: 60%; left: 51%; width: 49%; height: 35%;" 
-                     tabindex="0" role="button" aria-label="Tap to explore the word WRITE" 
-                     onclick="selectActivity('write')" onkeypress="if(event.key==='Enter') selectActivity('write')">
-                </div>
-            </div>
-        </div>
-
-        <!-- Fallback Buttons -->
-        <div class="w-full max-w-lg flex justify-center gap-3 mt-6">
-            <button onclick="selectActivity('run')" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-transform active:scale-95 border-b-4 border-red-700">RUN</button>
-            <button onclick="selectActivity('read')" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-transform active:scale-95 border-b-4 border-green-700">READ</button>
-            <button onclick="selectActivity('write')" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-transform active:scale-95 border-b-4 border-blue-700">WRITE</button>
-        </div>
-
-        <!-- TTS Error Message -->
-        <div id="tts-error" class="hidden mt-4 bg-red-50 text-red-700 px-4 py-3 rounded-xl border border-red-200 text-sm font-medium w-full max-w-lg text-center">
-            Speech synthesis is not available in this browser.
-        </div>
-
-        <!-- Explore Activity Card -->
-        <div id="explore-card-container" class="w-full max-w-lg mt-6 hidden">
-            <!-- Injected via JS -->
-        </div>
-
-    </main>
-
-    <!-- Teacher Setup Section (Collapsible) -->
-    <section class="max-w-3xl mx-auto w-full mt-8 bg-slate-800 text-slate-200 rounded-2xl overflow-hidden shadow-lg">
-        <button onclick="document.getElementById('teacher-content').classList.toggle('hidden')" class="w-full px-6 py-4 flex justify-between items-center bg-slate-900 hover:bg-slate-950 transition-colors">
-            <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-400" viewBox="0 0 256 256"><path fill="currentColor" d="M216,112V64a16,16,0,0,0-16-16H56A16,16,0,0,0,40,64v48a8,8,0,0,0,16,0V64H200v48a8,8,0,0,0,16,0ZM88,112a8,8,0,0,1-8-8V88a8,8,0,0,1,16,0v16A8,8,0,0,1,88,112Zm40,0a8,8,0,0,1-8-8V88a8,8,0,0,1,16,0v16A8,8,0,0,1,128,112Zm40,0a8,8,0,0,1-8-8V88a8,8,0,0,1,16,0v16A8,8,0,0,1,168,112Zm48,40H40a16,16,0,0,0-16,16v40a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V168A16,16,0,0,0,216,152Zm0,56H40V168H216v40Z"></path></svg>
-                Teacher Setup: Prepare AR Targets
-            </h2>
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-400" viewBox="0 0 256 256"><path fill="currentColor" d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></path></svg>
-        </button>
-        
-        <div id="teacher-content" class="p-6 hidden">
-            <p class="mb-4 text-sm text-slate-300">To create the AR experience, we need to extract the 3 specific illustrations from your book cover to use as tracking targets.</p>
-            
-            <button onclick="generateCrops()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded font-semibold mb-6 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256"><path fill="currentColor" d="M208,40H48A16,16,0,0,0,32,56V200a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V56A16,16,0,0,0,208,40Zm0,16V144L148.69,84.69a16,16,0,0,0-22.63,0L48,162.75V56ZM48,185.37l77.37-77.36,65.37,65.36ZM208,200H188.69l-44-44,20-20,43.31,43.31V200ZM92,108a12,12,0,1,1,12-12A12,12,0,0,1,92,108Z"></path></svg>
-                Generate Image Crops
+        <div class="flex flex-col gap-4 w-full">
+            <!-- Launch AR Button -->
+            <button onclick="startAR()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-5 px-6 rounded-2xl shadow-xl transition-transform active:scale-95 border-b-4 border-indigo-800 flex items-center justify-center gap-3 text-xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-indigo-200" viewBox="0 0 256 256"><path fill="currentColor" d="M208,40H160a8,8,0,0,0,0,16h40V96a8,8,0,0,0,16,0V48A8,8,0,0,0,208,40ZM56,96V56H96a8,8,0,0,0,0-16H48a8,8,0,0,0-8,8V96a8,8,0,0,0,16,0ZM96,200H56V160a8,8,0,0,0-16,0v48a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16Zm120-48a8,8,0,0,0-8,8v40H160a8,8,0,0,0,0,16h48a8,8,0,0,0,8-8V160A8,8,0,0,0,216,152Zm-48-52a40,40,0,1,0,40,40A40,40,0,0,0,168,100Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,168,164ZM88,100a40,40,0,1,0,40,40A40,40,0,0,0,88,100Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,88,164Z"></path></svg>
+                AR Camera Mode
             </button>
 
-            <div id="crop-results" class="hidden">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                    <!-- Run Crop -->
-                    <div class="bg-slate-700 p-3 rounded-lg flex flex-col items-center">
-                        <canvas id="crop-run" class="w-full h-auto bg-slate-900 rounded mb-3"></canvas>
-                        <span class="text-xs text-slate-400 mb-2 font-mono">00-run.jpg (Target 0)</span>
-                        <button onclick="downloadCrop('crop-run', '00-run.jpg')" class="w-full bg-slate-600 hover:bg-slate-500 py-1.5 rounded text-sm font-medium">Download</button>
-                    </div>
-                    <!-- Read Crop -->
-                    <div class="bg-slate-700 p-3 rounded-lg flex flex-col items-center">
-                        <canvas id="crop-read" class="w-full h-auto bg-slate-900 rounded mb-3"></canvas>
-                        <span class="text-xs text-slate-400 mb-2 font-mono">01-read.jpg (Target 1)</span>
-                        <button onclick="downloadCrop('crop-read', '01-read.jpg')" class="w-full bg-slate-600 hover:bg-slate-500 py-1.5 rounded text-sm font-medium">Download</button>
-                    </div>
-                    <!-- Write Crop -->
-                    <div class="bg-slate-700 p-3 rounded-lg flex flex-col items-center">
-                        <canvas id="crop-write" class="w-full h-auto bg-slate-900 rounded mb-3"></canvas>
-                        <span class="text-xs text-slate-400 mb-2 font-mono">02-write.jpg (Target 2)</span>
-                        <button onclick="downloadCrop('crop-write', '02-write.jpg')" class="w-full bg-slate-600 hover:bg-slate-500 py-1.5 rounded text-sm font-medium">Download</button>
-                    </div>
-                </div>
+            <!-- Launch Explore Button -->
+            <button onclick="startExplore()" class="bg-white hover:bg-slate-50 text-slate-700 font-bold py-5 px-6 rounded-2xl shadow-md transition-transform active:scale-95 border-2 border-slate-200 flex items-center justify-center gap-3 text-xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-yellow-500" viewBox="0 0 256 256"><path fill="currentColor" d="M232,116a60.07,60.07,0,0,0-60-60H140.94l11.53-11.53a8,8,0,0,0-11.32-11.31l-25,25a8,8,0,0,0,0,11.31l25,25a8,8,0,0,0,11.32-11.31L140.94,72H172a44,44,0,0,1,44,44v40a44,44,0,0,1-44,44H84a44,44,0,0,1-44-44V116A44,44,0,0,1,84,72h20a8,8,0,0,0,0-16H84a60.07,60.07,0,0,0-60,60v40a60.07,60.07,0,0,0,60,60h88a60.07,60.07,0,0,0,60-60Z"></path></svg>
+                Screen Tap Mode
+            </button>
+        </div>
 
-                <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
-                    <h3 class="font-bold text-yellow-400 mb-2">Next Step: Compile the Targets</h3>
-                    <ol class="list-decimal pl-5 text-sm space-y-2 text-slate-300">
-                        <li>Download all 3 images above.</li>
-                        <li>Go to the <a href="https://hiukim.github.io/mind-ar-js-doc/tools/compile" target="_blank" class="text-blue-400 hover:underline">MindAR Image Compiler</a>.</li>
-                        <li>Upload the 3 images <strong>in the exact order</strong> (00-run, 01-read, 02-write).</li>
-                        <li>Click Start and wait for it to generate.</li>
-                        <li>Download the compiled file, name it <code>targets.mind</code>, and upload it to your GitHub repository!</li>
-                    </ol>
+        <button onclick="document.getElementById('teacher-content').classList.toggle('hidden')" class="mt-16 text-sm text-slate-400 hover:text-slate-600 underline font-medium">
+            Teacher Setup
+        </button>
+        
+        <div id="teacher-content" class="w-full mt-4 p-4 bg-slate-800 text-slate-300 rounded-xl hidden text-sm">
+            <p class="mb-2 text-yellow-400 font-bold">AR Targets have been prepared!</p>
+            <p>Ensure your <code>targets.mind</code> file is uploaded to GitHub to make AR work.</p>
+        </div>
+    </div>
+
+    <!-- EXPLORE MODE VIEW -->
+    <div id="explore-view" class="hidden max-w-3xl w-full flex-col items-center pb-24 pop-in">
+        <div class="w-full flex justify-between items-center mb-4">
+            <button onclick="backToMenu()" class="bg-white border-2 border-slate-200 text-slate-600 px-4 py-2 rounded-xl font-bold hover:bg-slate-50 flex items-center gap-2 shadow-sm">
+                &larr; Back
+            </button>
+            <h2 class="text-xl font-bold text-blue-600">Explore Mode</h2>
+        </div>
+
+        <div class="relative w-full max-w-lg mx-auto rounded-xl overflow-hidden shadow-md border-2 border-slate-200 bg-slate-50 flex items-center justify-center mb-6">
+            <div id="image-wrapper" class="relative w-full" style="aspect-ratio: 7 / 10;">
+                <img src="book-page_5.jpg" alt="Book Cover" class="absolute inset-0 w-full h-full object-cover block select-none pointer-events-none" onerror="this.style.display='none'; document.getElementById('missing-img-msg').classList.remove('hidden');">
+                
+                <div id="missing-img-msg" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 hidden p-6 text-center bg-slate-100">
+                    <p class="font-bold text-lg text-slate-500">book-page_5.jpg is missing</p>
                 </div>
+                
+                <!-- RUN, READ, WRITE Hotspots -->
+                <div class="hotspot" style="top: 35%; left: 7%; width: 45%; height: 39%;" onclick="selectActivity('run')"></div>
+                <div class="hotspot" style="top: 27%; left: 64%; width: 36%; height: 32%;" onclick="selectActivity('read')"></div>
+                <div class="hotspot" style="top: 60%; left: 51%; width: 49%; height: 35%;" onclick="selectActivity('write')"></div>
             </div>
         </div>
-    </section>
 
+        <div id="explore-card-container" class="w-full max-w-lg hidden"></div>
+    </div>
+
+    <!-- AR CAMERA VIEW -->
+    <div id="ar-view" class="hidden">
+        <!-- UI Overlays for AR (Must have high z-index to sit above the camera canvas) -->
+        <div class="absolute top-4 left-4 right-4 z-[200] flex justify-between items-start pointer-events-none">
+            <button onclick="stopAR()" class="bg-red-500 text-white px-5 py-3 rounded-full font-bold shadow-xl border-b-4 border-red-700 active:scale-95 pointer-events-auto">
+                &larr; Exit AR
+            </button>
+            <div id="ar-scan-prompt" class="bg-slate-900/80 text-white px-4 py-3 rounded-2xl text-sm font-medium shadow-lg max-w-[200px] text-center backdrop-blur-sm">
+                Point camera at a picture on the book!
+            </div>
+        </div>
+
+        <div class="absolute bottom-6 left-4 right-4 z-[200] flex justify-center pointer-events-none">
+            <div id="ar-card-wrapper" class="w-full max-w-md pointer-events-auto hidden">
+                <!-- AR Cards get injected here -->
+            </div>
+        </div>
+
+        <!-- The A-Frame Scene. 
+             autoStart is false so it doesn't open camera until button is pressed. -->
+        <a-scene mindar-image="imageTargetSrc: targets.mind; autoStart: false; uiLoading: yes; uiError: yes;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+            <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+            
+            <!-- Index 0 corresponds to 00-run.jpg -->
+            <a-entity mindar-image-target="targetIndex: 0" id="target-run"></a-entity>
+            <!-- Index 1 corresponds to 01-read.jpg -->
+            <a-entity mindar-image-target="targetIndex: 1" id="target-read"></a-entity>
+            <!-- Index 2 corresponds to 02-write.jpg -->
+            <a-entity mindar-image-target="targetIndex: 2" id="target-write"></a-entity>
+        </a-scene>
+    </div>
+
+    <!-- AUDIO/DATA LOGIC -->
     <script>
         const activitiesData = {
-            run: {
-                word: "RUN",
-                color: "text-red-600",
-                bg: "bg-red-50",
-                border: "border-red-200",
-                sentence: "I run to school."
-            },
-            read: {
-                word: "READ",
-                color: "text-green-600",
-                bg: "bg-green-50",
-                border: "border-green-200",
-                sentence: "She reads a story."
-            },
-            write: {
-                word: "WRITE",
-                color: "text-blue-600",
-                bg: "bg-blue-50",
-                border: "border-blue-200",
-                sentence: "He writes in his book."
-            }
+            run: { word: "RUN", color: "text-red-600", bg: "bg-red-50", border: "border-red-200", sentence: "I run to school." },
+            read: { word: "READ", color: "text-green-600", bg: "bg-green-50", border: "border-green-200", sentence: "She reads a story." },
+            write: { word: "WRITE", color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200", sentence: "He writes in his book." }
         };
 
-        let activeWordId = null;
         const synth = window.speechSynthesis;
+        let activeWordId = null;
 
-        if (!synth) {
-            document.getElementById('tts-error').classList.remove('hidden');
-        }
-
-        function createCardHTML(activityData, wordId) {
+        // UI Card Generator
+        function createCardHTML(activityData, isAR = false) {
             const speechText = `${activityData.word}. ${activityData.sentence}`;
+            const shadow = isAR ? 'shadow-2xl' : 'shadow-xl';
             return `
-                <div class="bg-white rounded-2xl shadow-xl border-2 ${activityData.border} overflow-hidden pop-in">
-                    <div class="${activityData.bg} px-5 py-3 border-b ${activityData.border} flex justify-between items-center">
-                        <h2 class="text-2xl font-black ${activityData.color} tracking-wide">${activityData.word}</h2>
+                <div class="bg-white rounded-3xl ${shadow} border-4 ${activityData.border} overflow-hidden pop-in w-full">
+                    <div class="${activityData.bg} px-5 py-4 border-b-2 ${activityData.border} flex justify-between items-center">
+                        <h2 class="text-3xl font-black ${activityData.color} tracking-wide">${activityData.word}</h2>
                     </div>
                     <div class="p-5">
-                        <p class="text-xl text-slate-700 font-medium mb-6">"${activityData.sentence}"</p>
-                        
-                        <div class="flex gap-3 mb-5">
-                            <button onclick="playTTS('${speechText}')" class="flex-1 flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 py-3 rounded-xl font-bold transition-colors shadow-sm" aria-label="Listen">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256"><path fill="currentColor" d="M155.51,24.81a8,8,0,0,0-8.42,.88L73.25,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H73.25l73.84,54.31A8,8,0,0,0,160,224V32A8,8,0,0,0,155.51,24.81ZM144,207.64l-64-47.09A8,8,0,0,0,75.25,160H32V96H75.25a8,8,0,0,0,4.71-.55l64-47.09ZM197.35,165.17a8,8,0,0,1-11.83-10.79,40,40,0,0,0,0-52.76,8,8,0,0,1,11.83-10.79,56,56,0,0,1,0,74.34Zm37.11,33.58a8,8,0,0,1-11.75-10.87,88,88,0,0,0,0-119.76,8,8,0,0,1,11.75-10.87,104,104,0,0,1,0,141.5Z"></path></svg>
-                                Listen
+                        <p class="text-xl text-slate-800 font-bold mb-6">"${activityData.sentence}"</p>
+                        <div class="flex gap-3">
+                            <button onclick="playTTS('${speechText}')" class="flex-1 flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-2 border-indigo-200 py-3 rounded-xl font-bold active:scale-95 transition-all">
+                                🔊 Listen
                             </button>
-                            <button onclick="playTTS('${speechText}')" class="flex-none p-3 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl transition-colors shadow-sm" aria-label="Replay" title="Replay">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256"><path fill="currentColor" d="M197.58,69.58a8,8,0,0,1,0-11.32,96,96,0,1,0,32.33,78,8,8,0,0,1,16-.94A112,112,0,1,1,214.63,52.63L234.34,32.91A8,8,0,0,1,248,38.57v56a8,8,0,0,1-8,8h-56a8,8,0,0,1-5.66-13.66l22.63-22.63Z"></path></svg>
+                            <button onclick="stopTTS()" class="flex-none p-3 bg-red-50 hover:bg-red-100 text-red-600 border-2 border-red-200 rounded-xl active:scale-95 transition-all">
+                                ⏹ Stop
                             </button>
-                            <button onclick="stopTTS()" class="flex-none p-3 bg-slate-100 hover:bg-slate-200 text-red-500 border border-slate-200 rounded-xl transition-colors shadow-sm" aria-label="Stop" title="Stop">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256"><path fill="currentColor" d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32Zm0,176H48V48H208V208Z"></path></svg>
-                            </button>
-                        </div>
-                        
-                        <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-lg flex items-start gap-3 mt-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-indigo-500 mt-0.5 flex-none" viewBox="0 0 256 256"><path fill="currentColor" d="M128,24a80,80,0,0,0-80,80v16a80,80,0,0,0,160,0V104A80,80,0,0,0,128,24Zm64,96a64.07,64.07,0,0,1-64,64h-3.66c-2.48,0-5-.06-7.5-.18a64,64,0,1,1,75.16-75.16v11.34Zm-28.28-36.28a8,8,0,0,1,0,11.31l-24,24a8,8,0,0,1-11.32,0l-16-16a8,8,0,0,1,11.32-11.31L134,101.37l18.34-18.34A8,8,0,0,1,163.72,83.72Z"></path></svg>
-                            <p class="text-sm font-semibold text-indigo-900">Your turn! Say a sentence using this word.</p>
                         </div>
                     </div>
                 </div>
             `;
         }
 
-        function selectActivity(wordId) {
-            if (!activitiesData[wordId]) return;
-            
-            if (activeWordId !== wordId) {
-                stopTTS();
-                activeWordId = wordId;
-            }
-            
-            const container = document.getElementById('explore-card-container');
-            container.innerHTML = createCardHTML(activitiesData[wordId], wordId);
-            container.classList.remove('hidden');
+        // --- View Toggles ---
+        function startExplore() {
+            document.getElementById('main-menu').classList.add('hidden');
+            document.getElementById('explore-view').classList.remove('hidden');
+            document.getElementById('explore-view').classList.add('flex');
         }
 
-        // --- Text to Speech ---
+        function backToMenu() {
+            stopTTS();
+            document.getElementById('explore-view').classList.add('hidden');
+            document.getElementById('explore-view').classList.remove('flex');
+            document.getElementById('main-menu').classList.remove('hidden');
+            document.getElementById('explore-card-container').classList.add('hidden');
+        }
+
+        function startAR() {
+            document.getElementById('main-menu').classList.add('hidden');
+            const arView = document.getElementById('ar-view');
+            arView.classList.remove('hidden');
+            
+            // Start MindAR Engine
+            const sceneEl = document.querySelector('a-scene');
+            if (sceneEl.systems["mindar-image-system"]) {
+                sceneEl.systems["mindar-image-system"].start();
+            }
+        }
+
+        function stopAR() {
+            stopTTS();
+            const sceneEl = document.querySelector('a-scene');
+            if (sceneEl.systems["mindar-image-system"]) {
+                sceneEl.systems["mindar-image-system"].stop();
+            }
+            document.getElementById('ar-view').classList.add('hidden');
+            document.getElementById('main-menu').classList.remove('hidden');
+            document.getElementById('ar-card-wrapper').classList.add('hidden');
+            document.getElementById('ar-scan-prompt').classList.remove('hidden');
+        }
+
+        // --- Interaction Logic ---
+        function selectActivity(wordId) {
+            stopTTS();
+            const container = document.getElementById('explore-card-container');
+            container.innerHTML = createCardHTML(activitiesData[wordId], false);
+            container.classList.remove('hidden');
+            playTTS(`${activitiesData[wordId].word}. ${activitiesData[wordId].sentence}`);
+        }
+
+        function triggerARActivity(wordId) {
+            // Hide the instructions prompt
+            document.getElementById('ar-scan-prompt').classList.add('hidden');
+            
+            // Only update if it's a new word to avoid restarting the TTS unnecessarily
+            if (activeWordId !== wordId) {
+                activeWordId = wordId;
+                stopTTS();
+                const container = document.getElementById('ar-card-wrapper');
+                container.innerHTML = createCardHTML(activitiesData[wordId], true);
+                container.classList.remove('hidden');
+                
+                // Automatically read it out loud when found!
+                playTTS(`${activitiesData[wordId].word}. ${activitiesData[wordId].sentence}`);
+            }
+        }
+
+        // --- AR Event Listeners ---
+        document.addEventListener("DOMContentLoaded", () => {
+            const runTarget = document.querySelector('#target-run');
+            const readTarget = document.querySelector('#target-read');
+            const writeTarget = document.querySelector('#target-write');
+
+            // When the camera sees the specific image, trigger the UI
+            runTarget.addEventListener("targetFound", () => triggerARActivity('run'));
+            readTarget.addEventListener("targetFound", () => triggerARActivity('read'));
+            writeTarget.addEventListener("targetFound", () => triggerARActivity('write'));
+        });
+
+        // --- TTS Logic ---
         function playTTS(text) {
             if (!synth) return;
             synth.cancel(); 
-            
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = "en-US";
             utterance.rate = 0.85; 
             
             const voices = synth.getVoices();
-            const preferredVoice = voices.find(v => v.lang === 'en-US' && !v.name.includes('Google')) 
-                                || voices.find(v => v.lang.startsWith('en-'));
-            
+            const preferredVoice = voices.find(v => v.lang === 'en-US' && !v.name.includes('Google')) || voices.find(v => v.lang.startsWith('en-'));
             if (preferredVoice) utterance.voice = preferredVoice;
+            
             synth.speak(utterance);
         }
 
         function stopTTS() {
             if (synth) synth.cancel();
-        }
-
-        if (speechSynthesis.onvoiceschanged !== undefined) {
-            speechSynthesis.onvoiceschanged = () => synth.getVoices();
-        }
-
-        // --- Teacher Setup: Cropping Logic ---
-        function generateCrops() {
-            const img = document.getElementById('cover-image');
-            if (!img.complete || img.naturalWidth === 0) {
-                alert("Cover image hasn't loaded properly yet.");
-                return;
-            }
-
-            const nw = img.naturalWidth;
-            const nh = img.naturalHeight;
-
-            // Crop definitions based on your requested percentages
-            const crops = [
-                { id: 'run', canvasId: 'crop-run', left: 0.07, top: 0.35, width: 0.45, height: 0.39 },
-                { id: 'read', canvasId: 'crop-read', left: 0.64, top: 0.27, width: 0.36, height: 0.32 },
-                { id: 'write', canvasId: 'crop-write', left: 0.51, top: 0.60, width: 0.49, height: 0.35 }
-            ];
-
-            crops.forEach(c => {
-                const canvas = document.getElementById(c.canvasId);
-                canvas.width = nw * c.width;
-                canvas.height = nh * c.height;
-                const ctx = canvas.getContext('2d');
-                // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
-                ctx.drawImage(img, nw * c.left, nh * c.top, nw * c.width, nh * c.height, 0, 0, canvas.width, canvas.height);
-            });
-
-            document.getElementById('crop-results').classList.remove('hidden');
-        }
-
-        function downloadCrop(canvasId, filename) {
-            const canvas = document.getElementById(canvasId);
-            const link = document.createElement('a');
-            link.download = filename;
-            link.href = canvas.toDataURL('image/jpeg', 1.0); // Highest quality JPG
-            link.click();
         }
     </script>
 </body>
